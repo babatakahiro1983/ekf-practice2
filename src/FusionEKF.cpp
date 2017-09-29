@@ -51,10 +51,10 @@ FusionEKF::FusionEKF() {
 	  0, 1, 0, 0;
 
   //measurement matrix - radar
-  Hj_ << 1, 0, 0, 0,
-	  0, 1, 0, 0,
-	  0, 0, 1, 0;
-
+  //Hj_ << 1, 0, 0, 0,
+ //	  0, 1, 0, 0,
+ //	  0, 0, 1, 0;
+ //
   ////the initial transition matrix F_
   ekf_.F_ << 1, 0, 1, 0,
 	  0, 1, 0, 1,
