@@ -33,13 +33,11 @@ void KalmanFilter::Update(const VectorXd &z) {
   TODO: -> ok
     * update the state by using Kalman Filter equations
   */
-	VectorXd z_pred = H_ * x_;
-	VectorXd y = z - z_pred;
+	VectorXd y = z - H_ * x_;
 	MatrixXd Ht = H_.transpose();
 	MatrixXd S = H_ * P_ * Ht + R_;
 	MatrixXd Si = S.inverse();
-	MatrixXd PHt = P_ * Ht;
-	MatrixXd K = PHt * Si;
+	MatrixXd K = P_ * Ht * Si;
 
 	//new estimate
 	x_ = x_ + (K * y);
@@ -63,32 +61,35 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 	float vy = x_(3);
 
 	//pre-compute a set of terms to avoid repeated calculation
-	float c1 = px*px + py*py;
-	float c2 = sqrt(c1);
+	float ro = sqrt(px*px + py*py);
+	float phi = std::atan2(py, px);
+	float ro_dot;
 
-	VectorXd z_pred;
-	if (fabs(c2) < 0.0001) {
+	VectorXd z_pred = VectorXd(3);
+
+
+	if (fabs(ro) < 0.0001) {
 		z_pred << 0,
-			std::atan2(py, px),
+			phi,
 			0;
 	}
 	else {
-		z_pred << c2,
-			std::atan2(py, px),
-			(px*vx + py*vy) / c2;
+		ro_dot = (px*vy + py*vy) / ro;
+		z_pred << ro,
+			phi,
+			ro_dot;
 	}
 
 	VectorXd y = z - z_pred;
-	MatrixXd Hj_ = tools.CalculateJacobian(x_);
-	MatrixXd Ht = Hj_.transpose();
-	MatrixXd S = Hj_ * P_ * Ht + R_;
+
+	MatrixXd Ht = H_.transpose();
+	MatrixXd S = H_ * P_ * Ht + R_;
 	MatrixXd Si = S.inverse();
-	MatrixXd PHt = P_ * Ht;
-	MatrixXd K = PHt * Si;
+	MatrixXd K = P_ * Ht * Si;
 
 	//new estimate
 	x_ = x_ + (K * y);
 	long x_size = x_.size();
 	MatrixXd I = MatrixXd::Identity(x_size, x_size);
-	P_ = (I - K * Hj_) * P_;
+	P_ = (I - K * H_) * P_;
 }
