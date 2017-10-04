@@ -74,7 +74,7 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 			0;
 	}
 	else {
-		ro_dot = (px*vy + py*vy) / ro;
+		ro_dot = (px*vx + py*vy) / ro;
 		z_pred << ro,
 			phi,
 			ro_dot;
