@@ -50,10 +50,6 @@ FusionEKF::FusionEKF() {
   H_laser_ << 1, 0, 0, 0,
 	  0, 1, 0, 0;
 
-  //measurement matrix - radar
-  //Hj_ << 1, 0, 0, 0,
-	 // 0, 1, 0, 0,
-	 // 0, 0, 1, 0;
 
   ////the initial transition matrix F_
   ekf_.F_ << 1, 0, 1, 0,
@@ -169,7 +165,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     // Radar updates
 	  Hj_ = tools.CalculateJacobian(ekf_.x_);
 	  ekf_.H_ = Hj_;
-	  ekf_.R_ = R_radar_;
 	  ekf_.R_ = R_radar_;
 
 	  ekf_.UpdateEKF(measurement_pack.raw_measurements_);

@@ -1,5 +1,6 @@
 #include "kalman_filter.h"
 #include "tools.h"
+#include <math.h>
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -52,8 +53,6 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 	  * update the state by using Extended Kalman Filter equations
 	*/
 
-	Tools tools;
-
 	//recover state parameters
 	float px = x_(0);
 	float py = x_(1);
@@ -62,7 +61,7 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 
 	//pre-compute a set of terms to avoid repeated calculation
 	float ro = sqrt(px*px + py*py);
-	float phi = std::atan2(py, px);
+	float theta = std::atan2(py, px);
 	float ro_dot;
 
 	VectorXd z_pred = VectorXd(3);
@@ -70,17 +69,27 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 
 	if (fabs(ro) < 0.0001) {
 		z_pred << 0,
-			phi,
+			theta,
 			0;
 	}
 	else {
 		ro_dot = (px*vx + py*vy) / ro;
 		z_pred << ro,
-			phi,
+			theta,
 			ro_dot;
 	}
 
 	VectorXd y = z - z_pred;
+
+	if (y(1) > M_PI) {
+		y(1) = y(1) - (2 * M_PI);
+	}
+	else if(y(1) < -M_PI){
+		y(1) = y(1) + (2 * M_PI);
+	}
+	else {
+
+	}
 
 	MatrixXd Ht = H_.transpose();
 	MatrixXd S = H_ * P_ * Ht + R_;
